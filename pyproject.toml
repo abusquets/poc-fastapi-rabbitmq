@@ -1,0 +1,154 @@
+[tool.ruff]
+src = ["src"]
+line-length = 120
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming (N)
+    "YTT", # flake8-2020
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "T20", # flake8-print
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "ARG", # flake8-unused-arguments
+    "TCH", # flake8-type-checking
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+    "B904", # `except` clause, raise exceptions with `raise,
+    "B027", # is an empty method in an abstract base class
+    "B024", # abstract base class, but it has no abstract methods
+    "B026", # Star-arg unpacking after a keyword argument is strongly discouraged
+    "B905", # `zip()` without an explicit `strict=` parameter
+    "E701", # multiple statements on one line
+]
+# flake8 previously used the following codes:
+# E701 E231 E225 E999 W503 E251 C901 I004 E800 B008 B024 B026 B028
+target-version = "py312"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+# ISORT CONFIGURATION USED BY RUFF
+[tool.ruff.isort] # https://beta.ruff.rs/docs/settings/#isort
+force-sort-within-sections = true
+
+force-wrap-aliases = true
+combine-as-imports = true
+
+# The sections and order of the imports
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+# Our libraries used on the project, must be added here, then they will be groupped together
+known-first-party = []
+
+# Our local folders used on the project, must be added here, then they will be groupped together
+known-local-folder = [
+    "app",
+    "auth",
+    "config",
+    "core",
+    "infra",
+    "shared",
+    "utils",
+]
+
+# Third party libraries used on the project, must be added here, then they will be groupped together
+known-third-party = [
+    "beartype",
+    "bcrypt",
+    "colorlog",
+    "fastapi",
+    "faststream",
+    "pydantic",
+    "pytest",
+    "typer",
+    "yaml",
+    "uvicorn",
+]
+
+lines-after-imports = 2
+# lines-between-types = 1
+
+[tool.ruff.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+target-version = ['py312']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | migrations
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+[tool.pylint]
+max-line-length = 120
+disable = ["C0112", "C0114", "C0115", "C0116"]
+
+
+[tool.poetry]
+name = "poc-fastapi-rabbitmq"
+version = "0.1.0"
+description = ""
+authors = ["Alexandre Busquets Triola <abusquets@gmail.com>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.12"
+uvicorn = "^0.27.1"
+pyyaml = "^6.0.1"
+colorlog = "^6.8.2"
+amqp = "^5.2.0"
+debugpy = "^1.8.1"
+vine = "^5.1.0"
+anyio = "^4.2.0"
+idna = "^3.6"
+watchdog = "^4.0.0"
+fastapi = "^0.110.1"
+faststream = { extras = ["rabbit"], version = "^0.4.7" }
+
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.6.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

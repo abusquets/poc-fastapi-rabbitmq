@@ -1,0 +1,52 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+    standard_extra:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    error:
+        format: "%(levelname)s <PID %(process)d:%(processName)s> %(name)s.%(funcName)s(): %(message)s"
+    colored_extra:
+        class: utils.logger.formatter.color_extra.ColorFormatterExtra
+        format: "%(asctime)s.%(msecs)03d | %(log_color)s%(levelname)s:%(name)s:%(message)s %(reset)s %(module)s.%(funcName)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        stream: ext://sys.stdout
+        formatter: colored_extra
+
+root:
+    level: DEBUG
+    handlers: [console]
+    propagate: yes
+
+loggers:
+    requests:
+        level: INFO
+    sqlalchemy:
+        level: WARNING
+    uvicorn:
+        level: INFO
+    uvicorn.error:
+        level: INFO
+    uvicorn.access:
+        level: INFO
+    gunicorn:
+        level: INFO
+    botocore:
+        level: WARNING
+    aiormq:
+        level: ERROR
+    urllib3:
+        level: ERROR
+    aio_pika:
+        level: INFO
+    infra.database.sqlalchemy.session:
+        level: INFO
+    sqlalchemy.engine:
+        level: ERROR
+    faker.factory:
+        level: ERROR

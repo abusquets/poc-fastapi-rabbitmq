@@ -1,0 +1,57 @@
+exclude: "frontend|docs|node_modules|migrations|shared|.git|.tox|.hbs"
+default_stages: [commit]
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks # Refer to this repository for futher documentation about official pre-commit hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: double-quote-string-fixer
+      - id: mixed-line-ending
+      - id: check-toml
+      - id: check-yaml
+        args:
+          - --unsafe # Instead of loading the files, simply parse them for syntax.
+      - id: detect-private-key
+
+
+  - repo: https://github.com/myint/autoflake
+    rev: v2.2.1
+    hooks:
+      - id: autoflake
+        args:
+          [
+            "--in-place",
+            "--remove-all-unused-imports",
+            "--remove-unused-variable",
+          ]
+
+  # - repo: https://github.com/psf/black # Refer to this repository for futher documentation about black hook
+  #   rev: 23.12.1
+  #   hooks:
+  #     - id: black
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+    # Run the linter.
+    -   id: ruff
+        args: [--fix] # Enables autofix
+    # Run the formatter.
+    - id: ruff-format
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: [ "-iii", "-ll" ]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        args: [--config-file=mypy.ini, --ignore-missing-imports]
+        additional_dependencies: [types-redis, types-pyyaml, types-sqlalchemy, types-click, types-python-jose]

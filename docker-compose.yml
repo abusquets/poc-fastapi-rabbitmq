@@ -1,0 +1,60 @@
+version: "3.7"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        POETRY_DEV: ${POETRY_DEV:-true}
+        WAIT_BIN: ${WAIT_BIN:-wait}
+    env_file:
+      - env-api-dev
+    environment:
+      DEBUGPY: ${DEBUGPY:-false}
+      WAIT_HOSTS: rabbit:5672
+      WAIT_LOGGER_LEVEL: error
+      WAIT_TIMEOUT: 60
+      WAIT_SLEEP_INTERVAL: 5
+      PYDEVD_DISABLE_FILE_VALIDATION: 1
+    depends_on:
+      - rabbit
+
+    volumes:
+      - ./src/:/app:cached
+    ports:
+      - 8000:80
+      - 5678:5678 # debupy for webapp
+      - 5679:5679 # debupy for console
+    command:
+      - /bin/sh
+      - -c
+      - |
+        /wait && bash -c \
+        'if [ "${DEBUGPY}" == "true" ]; then \
+        python -m debugpy --listen 0.0.0.0:5678 \
+        -m uvicorn app.asgi:app --host 0.0.0.0 --port 80 \
+        --reload --reload-dir /app --log-config logging.dev.yaml; \
+        else \
+        python -m uvicorn app.asgi:app --host 0.0.0.0 --port 80 \
+        --reload --reload-dir /app --log-config logging.dev.yaml; \
+        fi'
+    restart: on-failure
+
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:3.10.5-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: 1234
+      RABBITMQ_DEFAULT_VHOST: test
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit log_levels [{connection,error}] -rabbitmq_management"
+
+    ports:
+      - 5672:5672 # AMQP protocol port
+      - 15672:15672 # HTTP management UI
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq/mnesia:delegated # Persistent local volume
+      - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf # RabbitMQ configuration file
+
+volumes:
+  rabbit_data:
