@@ -4,6 +4,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI, Request, Response
 from faststream.rabbit import RabbitBroker
+from faststream.rabbit.annotations import RabbitMessage
 
 from app.setup_logging import setup_logging
 from shared.exceptions import APPExceptionError
@@ -17,9 +18,10 @@ logger = logging.getLogger(__name__)
 broker = RabbitBroker('amqp://admin:1234@rabbit:5672/test')
 
 
-@broker.subscriber('test')
-async def base_handler(body: str) -> None:
+@broker.subscriber('test', retry=False)
+async def base_handler(body: str, msg: RabbitMessage) -> None:
     logger.info(body)
+    await msg.ack()
 
 
 async def start_broker() -> None:
