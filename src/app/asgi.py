@@ -33,8 +33,9 @@ async def stop_broker() -> None:
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator:
+async def lifespan(app: FastAPI) -> AsyncIterator:
     await start_broker()
+    app.state.broker = broker
     yield
     await stop_broker()
 
@@ -48,8 +49,8 @@ async def root() -> dict:
 
 
 @app.get('/hello')
-async def hello_http() -> dict:
-    await broker.publish('Hello, Rabbit!', 'test')
+async def hello_http(request: Request) -> dict:
+    await request.app.state.broker.publish('Hello, Rabbit!', 'test')
     return {'message': 'Hello Rabbit!!'}
 
 
