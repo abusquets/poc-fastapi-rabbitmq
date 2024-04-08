@@ -24,7 +24,7 @@ FROM python:${PYTHON_VERSION}-slim-bookworm
 ARG WAIT_BIN=wait
 
 # Add wait script
-ADD "https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/${WAIT_BIN}" /wait
+ADD "https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/${WAIT_BIN}" /wait
 RUN chmod +x /wait
 # wait script
 
