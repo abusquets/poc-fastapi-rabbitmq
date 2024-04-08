@@ -18,6 +18,7 @@ services:
       PYDEVD_DISABLE_FILE_VALIDATION: 1
     depends_on:
       - rabbit
+      - traefik
 
     volumes:
       - ./src/:/app:cached
@@ -39,6 +40,31 @@ services:
         --reload --reload-dir /app --log-config logging.dev.yaml; \
         fi'
     restart: on-failure
+    labels:
+      - "traefik.http.routers.api.rule=(Host(`app.localhost`) && PathPrefix(`/api`))"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        WAIT_BIN: ${WAIT_BIN:-wait}
+    volumes:
+      - ./frontend/:/app:cached
+      # - /usr/app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      WAIT_HOSTS: api:8080
+      WAIT_LOGGER_LEVEL: error
+      WAIT_TIMEOUT: 60
+      WAIT_SLEEP_INTERVAL: 5
+      PYDEVD_DISABLE_FILE_VALIDATION: 1
+    depends_on:
+      - api
+      - traefik
+    labels:
+      - "traefik.http.routers.site.rule=Host(`app.localhost`)"
 
   rabbit:
     container_name: rabbit
@@ -55,6 +81,15 @@ services:
     volumes:
       - rabbit_data:/var/lib/rabbitmq/mnesia:delegated # Persistent local volume
       - ./rabbit.conf:/etc/rabbitmq/rabbitmq.conf # RabbitMQ configuration file
+
+  traefik:
+    image: traefik:v2.9
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8081:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   rabbit_data:
